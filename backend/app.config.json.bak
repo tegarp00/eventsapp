@@ -1,5 +1,5 @@
 {
-    "appName": "nameApp",
+    "appName": "NameApp",
 
     "server": {
         "PORT": 9090,
