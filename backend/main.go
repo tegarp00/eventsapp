@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -28,4 +29,13 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	fmt.Println("db Connected!")
+
+
+  app := fiber.New()
+  
+  app.Get("/", func(c *fiber.Ctx) error {
+    return c.SendString("Hello World")
+  })
+
+  app.Listen(":" + viper.GetString("server.PORT"))
 }
