@@ -1,41 +1,55 @@
 package main
 
 import (
-	"fmt"
+	"event/handler"
+	"event/storage"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/spf13/viper"
-	"gorm.io/driver/postgres"
+	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 )
 
+type repository struct {
+  dbase *gorm.DB
+}
+
+func (r *repository) SetupRoutes(app *fiber.App) {
+  api := app.Group("/api/v1")
+
+  api.Get("/", handler.Test)
+}
+
 func main() {
 
-	// set config untuk membaca variabel
-	viper.SetConfigType("json")
-	viper.AddConfigPath(".")
-	viper.SetConfigName("app.config")
-
-	err := viper.ReadInConfig()
+	// setup config
+  err := godotenv.Load(".env")
 	if err != nil {
-		fmt.Println("Config not reading")
+		log.Fatal(err)
+	}
+	config := &storage.Config{
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		Password: os.Getenv("DB_PASS"),
+		User:     os.Getenv("DB_USER"),
+		SSLMode:  os.Getenv("DB_SSLMODE"),
+		DBName:   os.Getenv("DB_NAME"),
 	}
 
-	// mengkoneksikan database pakai gorm
-	dsn := viper.GetString("server.DB_URL")
-	_, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	fmt.Println("db Connected!")
 
+  db, err := storage.NewConnection(config)
+  if err != nil {
+    log.Fatal("database tidak bisa di load")
+  }
 
+  route := repository{
+    dbase: db,
+  }
+
+  // setup fiber(http route)
   app := fiber.New()
-  
-  app.Get("/", func(c *fiber.Ctx) error {
-    return c.SendString("Hello World")
-  })
+  route.SetupRoutes(app)
+  app.Listen(":" + os.Getenv("PORT"))
 
-  app.Listen(":" + viper.GetString("server.PORT"))
 }
