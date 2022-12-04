@@ -43,6 +43,7 @@ func main() {
     log.Fatal("database tidak bisa di load")
   }
 
+
   route := repository{
     dbase: db,
   }

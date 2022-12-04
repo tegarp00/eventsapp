@@ -1,0 +1,7 @@
+migrateup:
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/dbname?sslmode=disable" -verbose up
+
+migratedown:
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/dbname?sslmode=disable" -verbose down
+
+.PHONY : migrateup migratedown
